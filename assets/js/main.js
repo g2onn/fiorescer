@@ -30,8 +30,10 @@
      --------------------------------------------------------- */
   const alvos = [...new Set([...$$('[data-reveal]'), ...$$('.qual__cards li'), ...$$('.ln')])];
 
-  if ('IntersectionObserver' in window && !calmo()) {
+  if ('IntersectionObserver' in window) {
     document.documentElement.classList.add('reveal-ready');
+    // Aplica o estado transparente antes do primeiro callback do observador.
+    void document.documentElement.offsetHeight;
     const io = new IntersectionObserver((entradas) => {
       entradas.forEach((e) => {
         if (!e.isIntersecting) return;
@@ -581,7 +583,6 @@
     const botao = $('#videoSom');
     if (!video || !botao) return;
 
-    const texto = $('span', botao);
     const icones = $$('.canal__som-icone', botao);
     let naTela = false;
 
@@ -593,9 +594,8 @@
       const comSom = !video.muted;
       botao.setAttribute('aria-pressed', String(comSom));
       botao.setAttribute('aria-label', comSom ? 'Silenciar áudio do vídeo' : 'Ativar áudio do vídeo');
-      texto.textContent = comSom ? 'Silenciar áudio' : 'Ativar áudio';
-      icones[0].hidden = comSom;
-      icones[1].hidden = !comSom;
+      icones[0].toggleAttribute('hidden', !comSom);
+      icones[1].toggleAttribute('hidden', comSom);
     };
 
     const iniciar = () => {
