@@ -502,14 +502,8 @@ html.reveal-ready [data-reveal]:focus-within{opacity:1;transform:none}
 .fio__barras i::after{
   content:"";position:absolute;inset:0;
   background:var(--verde);
-  transform:scaleX(0);transform-origin:left;
+  transform:scaleX(var(--progresso,0));transform-origin:left;
 }
-.fio__barras [aria-selected="true"] i::after{
-  animation:preencher var(--dur,6800ms) linear forwards;
-}
-.fio__barras [data-feito="1"] i::after{transform:scaleX(1)}
-.fio__pausado .fio__barras [aria-selected="true"] i::after{animation-play-state:paused}
-@keyframes preencher{to{transform:scaleX(1)}}
 
 /* ==========================================================
    03 · SOBRE
@@ -562,13 +556,6 @@ html.reveal-ready [data-reveal]:focus-within{opacity:1;transform:none}
 }
 .prod__head .h2{max-width:14ch}
 .prod__sub{max-width:44ch;color:var(--tinta-70);font-size:clamp(.94rem,2.6vw,1.02rem)}
-.prod__aviso{
-  display:grid;gap:.25rem;max-width:60rem;
-  padding:.95rem 1.1rem;border-left:2px solid var(--laranja);
-  background:color-mix(in srgb,var(--creme) 66%,transparent);
-  color:var(--tinta-70);font-size:.79rem;line-height:1.6;
-}
-.prod__aviso span{font-size:.62rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta)}
 .prod__setas{
   display:grid;grid-template-columns:1fr 1fr;align-items:center;
   margin-bottom:1rem;
@@ -629,7 +616,7 @@ html.reveal-ready [data-reveal]:focus-within{opacity:1;transform:none}
   background:var(--verde);color:var(--creme);
   font-size:.6rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;
 }
-/* altura reservada ao produto para manter todos os cards nivelados */
+/* altura base; o JS amplia todos os cards juntos se o texto precisar */
 .card__palco{
   position:relative;
   flex:0 0 var(--card-palco);
@@ -778,10 +765,10 @@ html.reveal-ready [data-reveal]:focus-within{opacity:1;transform:none}
   background:var(--branco);color:var(--verde);
   box-shadow:0 14px 34px -30px rgba(14,49,32,.42);
   overflow:hidden;
-  opacity:0;transform:translateY(1.6rem);
   transition:opacity .85s var(--e) var(--d,0s), transform .95s var(--e) var(--d,0s), border-color .35s var(--e-io), box-shadow .35s var(--e-io);
 }
-.qual__cards li.in{opacity:1;transform:none}
+html.reveal-ready .qual__cards li{opacity:0;transform:translateY(1.6rem)}
+html.reveal-ready .qual__cards li.in{opacity:1;transform:none}
 .qual__cards li:hover{border-color:var(--tinta-14);box-shadow:0 20px 40px -30px rgba(14,49,32,.35);transform:translateY(-3px)}
 .qual__n{
   display:block;margin-bottom:.9rem;
@@ -1062,7 +1049,7 @@ html.reveal-ready [data-reveal]:focus-within{opacity:1;transform:none}
     align-items:end;gap:2rem 3rem;
   }
   .prod__sub{grid-column:1;max-width:52ch}
-  .card{width:min(29vw, 21rem)}
+  .card{width:min(35vw, 21rem);--card-palco:16rem}
 
   .card.is-aberto{width:min(88vw,44rem)}
   .card.is-aberto .card__txt{padding:1.45rem 1.55rem 1.6rem}
@@ -1071,7 +1058,6 @@ html.reveal-ready [data-reveal]:focus-within{opacity:1;transform:none}
   .rev__layout{grid-template-columns:minmax(0,1fr) minmax(20rem,.78fr)}
   .rev__oferta{justify-self:end}
   .canal__grid{grid-template-columns:minmax(17rem,.75fr) minmax(0,1.25fr)}
-  .prod__aviso{grid-column:1/-1}
 
   /* qualidade */
   .abert{grid-template-columns:.9fr 1.1fr;align-items:center;gap:clamp(2.4rem,5vw,4rem)}

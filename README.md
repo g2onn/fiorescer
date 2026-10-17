@@ -70,13 +70,15 @@ frases exatamente como foram escritas no roteiro.
 - Carrossel do fio: crossfade com zoom lento, avanço automático de 6,8s que pausa
   no hover, no foco, fora da tela e com a aba em segundo plano. Aceita arrasto,
   toque, setas e as barras de progresso.
-- Carrossel de produtos: scroll nativo com snap, arrasto com o mouse, setas no
-  desktop e barra de progresso. Os cards fora do centro suavizam com
-  `animation-timeline: view()` onde houver suporte.
+- Carrossel de produtos: scroll com snap, botões de navegação, teclado e barra
+  de progresso. Os cards mantêm alturas iguais e aumentam juntos quando o texto
+  precisa de mais espaço; assim, paletas e o link “Ver mais” não são cortados.
+  Os cards fora do centro suavizam com `animation-timeline: view()` onde houver
+  suporte.
 - Reveals por `IntersectionObserver`, com atraso escalonado via `--d`.
 
-Tudo respeita `prefers-reduced-motion: reduce`: o avanço automático para, as
-transições somem e o conteúdo aparece direto.
+Tudo respeita `prefers-reduced-motion: reduce`: o avanço automático para, os
+deslocamentos são removidos e o conteúdo aparece com um fade curto.
 
 ## Contatos usados
 

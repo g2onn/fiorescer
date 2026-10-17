@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="image" href="assets/img/cenas/hero.webp" fetchpriority="high">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=17">
+<link rel="stylesheet" href="assets/css/style.css?v=20">
 
 <script type="application/ld+json">
 {
@@ -205,16 +205,16 @@
 </section>
 
 <!-- ============ 04 · CARROSSEL: O QUE VOCÊ VÊ EM UM FIO? ============ -->
-<section class="fio" id="fio" aria-roledescription="carrossel" aria-label="O que você vê em um fio?">
+<section class="fio" id="fio" role="region" aria-roledescription="carrossel" aria-label="O que você vê em um fio?">
   <div class="wrap fio__head">
     <p class="eyebrow eyebrow--c" data-reveal><span class="eyebrow__dot" aria-hidden="true"></span>Capítulo 04</p>
     <h2 class="h2 fio__h2" data-reveal style="--d:.08s">O que você vê<br>em um fio?</h2>
   </div>
 
-  <div class="fio__palco" id="fioPalco" data-reveal style="--d:.12s">
+  <div class="fio__palco" id="fioPalco" role="group" aria-roledescription="carrossel" aria-label="Artes do fio. Use as setas para navegar." tabindex="0" data-reveal style="--d:.12s">
     <div class="fio__slides" id="fioSlides">
 
-      <article class="fio__s is-on" data-i="0" aria-label="1 de 5">
+      <article class="fio__s is-on" id="fioSlide1" data-i="0" role="tabpanel" aria-roledescription="slide" aria-labelledby="fioTab1" tabindex="0">
         <figure class="fio__fig">
           <img src="assets/img/produtos/lotus.webp" alt="Rolo de Fio Lótus na cor mostarda visto de perto" width="900" height="900" decoding="async">
         </figure>
@@ -224,7 +224,7 @@
         </div>
       </article>
 
-      <article class="fio__s" data-i="1" aria-label="2 de 5" aria-hidden="true">
+      <article class="fio__s" id="fioSlide2" data-i="1" role="tabpanel" aria-roledescription="slide" aria-labelledby="fioTab2" tabindex="-1" aria-hidden="true">
         <figure class="fio__fig">
           <img src="assets/img/produtos/brilhare.webp" alt="Novelo do Fio Brilhare em uma composição com textura e brilho" width="648" height="648" loading="lazy" decoding="async">
         </figure>
@@ -234,7 +234,7 @@
         </div>
       </article>
 
-      <article class="fio__s" data-i="2" aria-label="3 de 5" aria-hidden="true">
+      <article class="fio__s" id="fioSlide3" data-i="2" role="tabpanel" aria-roledescription="slide" aria-labelledby="fioTab3" tabindex="-1" aria-hidden="true">
         <figure class="fio__fig">
           <img src="assets/img/produtos/rolos-coloridos.webp" alt="Dezenas de mini rolos de fio de malha em cores e texturas diferentes, organizados em diagonal" width="900" height="600" loading="lazy" decoding="async">
         </figure>
@@ -244,7 +244,7 @@
         </div>
       </article>
 
-      <article class="fio__s" data-i="3" aria-label="4 de 5" aria-hidden="true">
+      <article class="fio__s" id="fioSlide4" data-i="3" role="tabpanel" aria-roledescription="slide" aria-labelledby="fioTab4" tabindex="-1" aria-hidden="true">
         <figure class="fio__fig">
           <img src="assets/img/cenas/bolsa-praia.webp" alt="Bolsa de crochê feita com fio de malha natural, apoiada na areia da praia" width="1100" height="1522" loading="lazy" decoding="async">
         </figure>
@@ -254,7 +254,7 @@
         </div>
       </article>
 
-      <article class="fio__s" data-i="4" aria-label="5 de 5" aria-hidden="true">
+      <article class="fio__s" id="fioSlide5" data-i="4" role="tabpanel" aria-roledescription="slide" aria-labelledby="fioTab5" tabindex="-1" aria-hidden="true">
         <figure class="fio__fig">
           <img src="assets/img/cenas/crochet-colorido.webp" alt="Mãos trabalhando sobre uma manta de crochê formada por dezenas de flores coloridas" width="978" height="1400" loading="lazy" decoding="async">
         </figure>
@@ -274,12 +274,12 @@
     </button>
   </div>
 
-  <div class="wrap fio__barras" id="fioBarras" data-reveal style="--d:.08s" role="tablist" aria-label="Escolher arte">
-    <button role="tab" aria-selected="true" aria-label="Arte 1"><i></i></button>
-    <button role="tab" aria-selected="false" aria-label="Arte 2"><i></i></button>
-    <button role="tab" aria-selected="false" aria-label="Arte 3"><i></i></button>
-    <button role="tab" aria-selected="false" aria-label="Arte 4"><i></i></button>
-    <button role="tab" aria-selected="false" aria-label="Arte 5"><i></i></button>
+  <div class="wrap fio__barras" id="fioBarras" data-reveal style="--d:.08s" role="tablist" aria-orientation="horizontal" aria-label="Escolher arte">
+    <button id="fioTab1" role="tab" aria-controls="fioSlide1" aria-selected="true" aria-label="Arte 1 de 5" tabindex="0"><i></i></button>
+    <button id="fioTab2" role="tab" aria-controls="fioSlide2" aria-selected="false" aria-label="Arte 2 de 5" tabindex="-1"><i></i></button>
+    <button id="fioTab3" role="tab" aria-controls="fioSlide3" aria-selected="false" aria-label="Arte 3 de 5" tabindex="-1"><i></i></button>
+    <button id="fioTab4" role="tab" aria-controls="fioSlide4" aria-selected="false" aria-label="Arte 4 de 5" tabindex="-1"><i></i></button>
+    <button id="fioTab5" role="tab" aria-controls="fioSlide5" aria-selected="false" aria-label="Arte 5 de 5" tabindex="-1"><i></i></button>
   </div>
 </section>
 
@@ -348,11 +348,6 @@
       cada um faz de melhor e escolha pelo que você quer criar.
     </p>
 
-    <aside class="prod__aviso" data-reveal style="--d:.18s">
-      <span>Sobre as cores</span>
-      As tonalidades podem variar entre lotes e reposições. Consulte as cores disponíveis antes de fechar o pedido.
-    </aside>
-
   </div>
 
   <nav class="wrap prod__setas" data-reveal style="--d:.12s" aria-label="Navegação dos fios">
@@ -384,7 +379,7 @@
               <li>100% poliéster</li>
               <li>Crochê nº 3 a 4 · Tricô nº 4 a 5</li>
             </ul>
-            <p class="card__nota">Venda em múltiplos de 6 · 6 cores coringa</p>
+            <p class="card__nota">Venda em múltiplos de 6 · cartela fixa com 6 cores</p>
           </div>
           <button class="card__ver-mais" type="button" aria-expanded="false" aria-controls="detalhes-brilhare">Ver mais <span aria-hidden="true">↗</span></button>
         </div>
@@ -407,7 +402,7 @@
               <li>100% poliéster</li>
               <li>Espessura 5 mm · Agulha nº 4 a 6</li>
             </ul>
-            <p class="card__nota">21 cores na cartela</p>
+            <p class="card__nota">Cartela fixa com 22 cores</p>
           </div>
           <button class="card__ver-mais" type="button" aria-expanded="false" aria-controls="detalhes-lotus">Ver mais <span aria-hidden="true">↗</span></button>
         </div>
@@ -430,7 +425,7 @@
               <li>100% poliéster</li>
               <li>Espessura 5 mm · Agulha nº 4 a 6</li>
             </ul>
-            <p class="card__nota">Fio com lurex · 6 cores com brilho</p>
+            <p class="card__nota">Cartela fixa com 8 cores</p>
           </div>
           <button class="card__ver-mais" type="button" aria-expanded="false" aria-controls="detalhes-lotus-glitter">Ver mais <span aria-hidden="true">↗</span></button>
         </div>
@@ -454,7 +449,7 @@
               <li>85% algodão · 15% outras fibras</li>
               <li>Fio aberto de 1,5 a 3,5 cm · Agulha nº 7 a 12</li>
             </ul>
-            <p class="card__nota">Mais de 30 tons · consulte a disponibilidade</p>
+            <p class="card__nota">As tonalidades podem variar. Consulte a disponibilidade antes de fechar o pedido.</p>
           </div>
           <button class="card__ver-mais" type="button" aria-expanded="false" aria-controls="detalhes-malha-residual">Ver mais <span aria-hidden="true">↗</span></button>
         </div>
@@ -466,7 +461,7 @@
         <div class="card__palco"><img src="assets/img/produtos/cotton-residual.webp?v=2" alt="Rolo verde de 1 kg do Fio de Cotton Residual Fiorescer" width="1254" height="1254" loading="lazy" decoding="async"></div>
         <div class="card__txt">
           <h3 class="card__nome">Fio de Cotton Residual</h3>
-          <p class="card__frase">Algodão com elastano: acompanha o ponto e dá elasticidade às peças.</p>
+          <p class="card__frase">Algodão com elastano e espessura mais uniforme: acompanha o ponto e dá elasticidade às peças.</p>
           <div class="card__paleta">
             <div class="card__cores" data-paleta="cotton-residual" aria-label="Tonalidades do Fio de Cotton Residual"></div>
             <p class="card__cor-nome" aria-live="polite"></p>
@@ -478,7 +473,7 @@
               <li>92% algodão · 8% elastano</li>
               <li>Fio aberto de 1,5 a 3,5 cm · Agulha nº 7 a 12</li>
             </ul>
-            <p class="card__nota">Mais de 30 tons · consulte a disponibilidade</p>
+            <p class="card__nota">As tonalidades podem variar. Consulte a disponibilidade antes de fechar o pedido.</p>
           </div>
           <button class="card__ver-mais" type="button" aria-expanded="false" aria-controls="detalhes-cotton-residual">Ver mais <span aria-hidden="true">↗</span></button>
         </div>
@@ -502,7 +497,7 @@
               <li>90% poliamida · 10% elastano</li>
               <li>Fio aberto de 1,5 a 3,5 cm · Agulha nº 5 a 12</li>
             </ul>
-            <p class="card__nota">Mais de 20 tons · consulte a disponibilidade</p>
+            <p class="card__nota">As tonalidades podem variar. Consulte a disponibilidade antes de fechar o pedido.</p>
           </div>
           <button class="card__ver-mais" type="button" aria-expanded="false" aria-controls="detalhes-poliamida-residual">Ver mais <span aria-hidden="true">↗</span></button>
         </div>
@@ -626,6 +621,6 @@
   <span class="fab__t">WhatsApp</span>
 </a>
 
-<script src="assets/js/main.js?v=13" defer></script>
+<script src="assets/js/main.js?v=19" defer></script>
 </body>
 </html>

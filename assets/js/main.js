@@ -112,6 +112,7 @@
   links.forEach((a, i) => a.style.setProperty('--i', i));
 
   let aberto = false;
+  let focoMenuTimer = 0;
 
   const abrirMenu = () => {
     if (aberto) return;
@@ -126,12 +127,17 @@
     document.body.classList.add('trava');
     travaHeader = true;
     hd.classList.remove('oculto');
-    setTimeout(() => fechar.focus({ preventScroll: true }), 260);
+    focoMenuTimer = setTimeout(() => {
+      focoMenuTimer = 0;
+      if (aberto) fechar.focus({ preventScroll: true });
+    }, 260);
   };
 
   const fecharMenu = ({ devolverFoco = true } = {}) => {
     if (!aberto) return;
     aberto = false;
+    clearTimeout(focoMenuTimer);
+    focoMenuTimer = 0;
     veu.classList.remove('on');
     drawer.classList.remove('on');
     drawer.setAttribute('inert', '');
@@ -147,7 +153,21 @@
   burger.addEventListener('click', () => (aberto ? fecharMenu() : abrirMenu()));
   fechar.addEventListener('click', () => fecharMenu());
   veu.addEventListener('click', () => fecharMenu());
-  links.forEach((a) => a.addEventListener('click', () => fecharMenu({ devolverFoco: false })));
+  links.forEach((a) => a.addEventListener('click', () => {
+    const destinoId = a.hash.slice(1);
+    fecharMenu({ devolverFoco: false });
+    if (!destinoId) return;
+
+    // A navegação nativa rola até a seção; depois, entrega o foco ao título.
+    setTimeout(() => {
+      const destino = document.getElementById(destinoId);
+      const titulo = destino?.matches('h1,h2,h3') ? destino : destino?.querySelector('h1,h2,h3');
+      const alvo = titulo || destino;
+      if (!alvo) return;
+      if (!alvo.hasAttribute('tabindex')) alvo.setAttribute('tabindex', '-1');
+      alvo.focus({ preventScroll: true });
+    }, 0);
+  }));
 
   addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && aberto) fecharMenu();
@@ -161,9 +181,16 @@
   });
 
   // largura de desktop cancela o drawer
-  matchMedia('(min-width: 860px)').addEventListener('change', (e) => {
-    if (e.matches) fecharMenu({ devolverFoco: false });
-  });
+  const mqDesktop = matchMedia('(min-width: 860px)');
+  const aoMudarBreakpoint = (e) => {
+    if (!e.matches || !aberto) return;
+    const href = document.activeElement.closest?.('.drw__nav a[href]')?.getAttribute('href');
+    fecharMenu({ devolverFoco: false });
+    const destino = href && $$('.hd__nav a').find((a) => a.getAttribute('href') === href);
+    (destino || $('.hd__cta'))?.focus({ preventScroll: true });
+  };
+  if (mqDesktop.addEventListener) mqDesktop.addEventListener('change', aoMudarBreakpoint);
+  else mqDesktop.addListener(aoMudarBreakpoint);
 
   /* ---------------------------------------------------------
      8 · Link ativo na navegação
@@ -195,7 +222,6 @@
 
     const slides = $$('.fio__s', palco);
     const barras = $$('#fioBarras button');
-    const secao  = $('#fio');
     const DUR    = 6800;
 
     let atual = 0, pausado = false, visivel = false, decorrido = 0, ultimo = 0, raf = 0;
@@ -212,12 +238,13 @@
         const on = k === n;
         s.classList.toggle('is-on', on);
         s.setAttribute('aria-hidden', String(!on));
+        s.tabIndex = on ? 0 : -1;
       });
 
       barras.forEach((b, k) => {
         b.setAttribute('aria-selected', String(k === n));
-        if (k < n) b.dataset.feito = '1';
-        else delete b.dataset.feito;
+        b.tabIndex = k === n ? 0 : -1;
+        b.querySelector('i')?.style.setProperty('--progresso', k < n ? 1 : 0);
       });
 
       atual = n;
@@ -239,18 +266,34 @@
       $('#fioSlides').style.minHeight = `${Math.max(...alturas)}px`;
     };
 
-    /* relógio do autoplay, sincronizado com a barra em CSS */
+    /* relógio do autoplay e da barra de progresso */
+    const podeAvancar = () => !pausado && visivel && !calmo() && !document.hidden;
+
     const loop = (agora) => {
+      raf = 0;
+      if (!podeAvancar()) { ultimo = 0; return; }
       const dt = ultimo ? agora - ultimo : 0;
       ultimo = agora;
-      if (!pausado && visivel && !calmo() && !document.hidden) {
-        decorrido += dt;
-        if (decorrido >= DUR) proximo();
-      }
-      raf = requestAnimationFrame(loop);
+      decorrido += dt;
+      barras[atual]?.querySelector('i')?.style.setProperty('--progresso', Math.min(decorrido / DUR, 1));
+      if (decorrido >= DUR) proximo();
+      if (podeAvancar()) raf = requestAnimationFrame(loop);
     };
 
-    const pausar  = (v) => { pausado = v; secao.classList.toggle('fio__pausado', v); };
+    const sincronizarLoop = () => {
+      if (podeAvancar()) {
+        if (!raf) { ultimo = 0; raf = requestAnimationFrame(loop); }
+        return;
+      }
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      ultimo = 0;
+    };
+
+    const pausar = (v) => {
+      pausado = v;
+      sincronizarLoop();
+    };
 
     palco.addEventListener('pointerenter', () => pausar(true));
     palco.addEventListener('pointerleave', () => pausar(false));
@@ -258,13 +301,29 @@
     palco.addEventListener('focusout', () => pausar(false));
 
     if ('IntersectionObserver' in window) {
-      new IntersectionObserver(([e]) => { visivel = e.isIntersecting; },
+      new IntersectionObserver(([e]) => {
+        visivel = e.isIntersecting;
+        sincronizarLoop();
+      },
         { threshold: 0.25 }).observe(palco);
     } else visivel = true;
 
     $('#fioNext').addEventListener('click', proximo);
     $('#fioPrev').addEventListener('click', anterior);
-    barras.forEach((b, i) => b.addEventListener('click', () => ir(i)));
+    barras.forEach((b, i) => {
+      b.addEventListener('click', () => ir(i));
+      b.addEventListener('keydown', (e) => {
+        let n;
+        if (e.key === 'ArrowRight') n = (i + 1) % barras.length;
+        else if (e.key === 'ArrowLeft') n = (i - 1 + barras.length) % barras.length;
+        else if (e.key === 'Home') n = 0;
+        else if (e.key === 'End') n = barras.length - 1;
+        else return;
+        e.preventDefault();
+        ir(n);
+        barras[n].focus();
+      });
+    });
 
     palco.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight') { e.preventDefault(); proximo(); }
@@ -298,9 +357,15 @@
     addEventListener('resize', debounce(ajustar, 180));
     addEventListener('load', ajustar);
     ajustar();
-    raf = requestAnimationFrame(loop);
+    sincronizarLoop();
 
-    document.addEventListener('visibilitychange', () => { ultimo = 0; });
+    document.addEventListener('visibilitychange', () => {
+      ultimo = 0;
+      sincronizarLoop();
+    });
+    const aoMudarMovimento = () => sincronizarLoop();
+    if (mqCalmo.addEventListener) mqCalmo.addEventListener('change', aoMudarMovimento);
+    else mqCalmo.addListener(aoMudarMovimento);
   })();
 
   /* ---------------------------------------------------------
@@ -310,8 +375,8 @@
     const pista = $('#prodPista');
     if (!pista) return;
 
-    // Nomes e ordem das cartelas do Catálogo Fiorescer 2026.
-    // Os hex são aproximações visuais: o PDF não informa códigos de cor.
+    // Nomes e ordem conferidos nas pastas atuais de produtos do Drive.
+    // Os hex são aproximações visuais das fotos, que não informam códigos de cor.
     const paletas = {
       brilhare: [
         ['Ouro', '#A18942'], ['Prata', '#B8BBB9'], ['Branco', '#E0E0DC'],
@@ -323,11 +388,13 @@
         ['Vermelho Paixão', '#A92B2D'], ['Palha', '#A07E53'], ['Ferrugem', '#9A4C23'], ['Verde Floresta', '#1F4F45'],
         ['Natural', '#D0CAB6'], ['Cinza Níquel', '#A5A896'], ['Azul Marinho', '#232962'], ['Verde Maçã', '#9BB45D'],
         ['Amarelo Sol', '#F0C148'], ['Azul Royal', '#313294'], ['Verde Bandeira', '#43A151'], ['Mostarda', '#C68B35'],
-        ['Copa', 'linear-gradient(135deg,#148E57 0 34%,#F1CF45 34% 67%,#2374C6 67%)'],
+        ['Copa', 'linear-gradient(135deg,#148E57 0 34%,#F1CF45 34% 67%,#2374C6 67%)'], ['Bordô', '#7A263E'],
       ],
       'lotus-glitter': [
         ['Pérola Glitter', '#C1A388'], ['Preto Glitter', '#2B413F'], ['Rosa Antigo Glitter', '#B37A94'],
         ['Ouro Antigo Glitter', '#9B6C33'], ['Vermelho Glitter', '#B9442E'], ['Verde Glitter', '#2D6D58'],
+        ['Bordô Glitter', 'linear-gradient(135deg,#70243A 0 72%,#C7A34C 72%)'],
+        ['Natalino', 'linear-gradient(135deg,#26724A 0 34%,#A32B31 34% 67%,#D2AA47 67%)'],
       ],
       'malha-residual': [
         ['Amarelo Claro', '#D7D278'], ['Amarelo Médio', '#D5B358'], ['Amarelo Escuro', '#C99614'],
@@ -341,8 +408,7 @@
         ['Nude', '#B7A993'], ['Off White', '#F1EDE5'], ['Preto', '#1B1B18'],
         ['Rosa Claro', '#D69EB4'], ['Rosa Médio', '#CF7891'], ['Rosa Envelhecido', '#B58A87'], ['Rosa Escuro', '#C92855'], ['Roxo', '#713F92'],
         ['Salmão', '#ECA07E'], ['Terrosos', 'linear-gradient(135deg,#D1AD8A 0 33%,#B37B58 33% 66%,#8F5639 66%)'],
-        ['Verde Claro', '#9CB9A3'], ['Verde Médio', '#36AD87'], ['Verde Médio', '#36AD87'],
-        ['Verde Escuro', '#267764'], ['Verde Escuro', '#267764'], ['Vermelho', '#D72E33'],
+        ['Verde Claro', '#9CB9A3'], ['Verde Médio', '#36AD87'], ['Verde Escuro', '#267764'], ['Vermelho', '#D72E33'],
         ['Misturinha', 'linear-gradient(135deg,#D7B358 0 25%,#C92855 25% 50%,#267764 50% 75%,#607A9B 75%)'],
       ],
       'cotton-residual': [
@@ -350,7 +416,7 @@
         ['Verde Claro', '#9CB9A3'], ['Verde Médio', '#36AD87'], ['Verde Escuro', '#267764'], ['Laranja', '#EF680D'],
         ['Vermelho', '#D72E33'], ['Bordô', '#711A38'],
         ['Terrosos', 'linear-gradient(135deg,#D1AD8A 0 33%,#B37B58 33% 66%,#8F5639 66%)'],
-        ['Terrosos', 'linear-gradient(135deg,#D1AD8A 0 33%,#B37B58 33% 66%,#8F5639 66%)'],
+        ['Terrosos', 'linear-gradient(135deg,#C97334 0 33%,#A35A2D 33% 66%,#8B3F24 66%)'],
         ['Rosa Claro', '#D69EB4'], ['Rosa Médio', '#CF7891'], ['Rosa Escuro', '#C92855'], ['Rosa Envelhecido', '#B58A87'],
         ['Lilás', '#A99CBD'], ['Roxo', '#713F92'],
         ['Neon', 'linear-gradient(135deg,#D9F23D 0 33%,#FF56B2 33% 66%,#51DF86 66%)'], ['Nude', '#B7A993'],
@@ -424,6 +490,38 @@
     const lista = $('#prodLista');
     const cards = $$('.card', pista);
     const comportamento = () => calmo() ? 'auto' : 'smooth';
+
+    const ajustarAlturaCards = () => {
+      // Mede os cards fechados após restaurar a altura base do breakpoint.
+      cards.forEach((card) => card.style.removeProperty('--card-info'));
+      const fechados = cards.filter((card) => !card.classList.contains('is-aberto'));
+      if (!fechados.length) return;
+      const altura = Math.ceil(Math.max(...fechados.map((card) => {
+        const texto = $('.card__txt', card);
+        const botao = $('.card__ver-mais', card);
+        const textoRect = texto.getBoundingClientRect();
+        const botaoRect = botao.getBoundingClientRect();
+        const respiroInferior = Number.parseFloat(getComputedStyle(texto).paddingBottom) || 0;
+        const alturaParaBotao = botaoRect.bottom - textoRect.top + respiroInferior + 2;
+        return Math.max(texto.scrollHeight, alturaParaBotao);
+      })));
+      cards.forEach((card) => card.style.setProperty('--card-info', `${altura}px`));
+    };
+
+    ajustarAlturaCards();
+    let ajusteFinalResize = 0;
+    addEventListener('resize', debounce(() => {
+      ajustarAlturaCards();
+      clearTimeout(ajusteFinalResize);
+      ajusteFinalResize = setTimeout(ajustarAlturaCards, 360);
+    }, 120));
+    if ('ResizeObserver' in window) {
+      const observadorTamanho = new ResizeObserver(ajustarAlturaCards);
+      cards.forEach((card) => observadorTamanho.observe($('.card__palco', card)));
+    }
+    addEventListener('load', ajustarAlturaCards, { once: true });
+    if (document.fonts?.ready) document.fonts.ready.then(ajustarAlturaCards);
+
     let scrollDeOrigem = null;
     let retornoPendente = null;
     let temporizadorRetorno = 0;
@@ -455,6 +553,7 @@
       clearTimeout(temporizadorRetorno);
       temporizadorRetorno = 0;
       retornoPendente = null;
+      ajustarAlturaCards();
 
       const aberto = $('.card.is-aberto', pista);
       if (aberto) {
@@ -519,6 +618,7 @@
       fechar.addEventListener('click', () => fecharCard(card, true));
       card.addEventListener('transitionend', (event) => {
         if (event.propertyName !== 'width') return;
+        ajustarAlturaCards();
         if (retornoPendente === card) {
           concluirRetorno(card);
           return;
