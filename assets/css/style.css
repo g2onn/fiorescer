@@ -463,13 +463,9 @@ html.reveal-ready [data-reveal]:focus-within{opacity:1;transform:none}
 }
 .fio__s.is-on .fio__fig img{transform:scale(1);opacity:1}
 
-/* os recortes (fundo transparente) respiram dentro do palco;
-   as fotos continuam preenchendo a moldura */
-.fio__s[data-i="0"] .fio__fig img,
-.fio__s[data-i="2"] .fio__fig img{
-  object-fit:contain;padding:clamp(1rem,4.2vw,2.4rem);
-  background:radial-gradient(circle at 50% 46%, var(--areia-luz) 0%, var(--creme) 62%);
-}
+/* No desktop, a foto vertical destaca as mãos e o trabalho manual. */
+.fio__s[data-i="0"] .fio__fig img{object-position:center 80%}
+.fio__s[data-i="2"] .fio__fig img{object-fit:cover;padding:0;background:none;object-position:center 72%}
 
 .fio__cap{display:flex;gap:1rem;align-items:flex-start}
 .fio__n{
